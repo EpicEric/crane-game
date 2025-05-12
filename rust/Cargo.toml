@@ -1,0 +1,48 @@
+[package]
+authors = ["Eric Rodrigues Pires <eric@eric.dev.br>"]
+name = "crane-game"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = "1.0.96"
+async-trait = "0.1"
+axum = { version = "0.8.1", features = ["ws"] }
+axum-macros = "0.5.0"
+backon = "1.4.0"
+base64 = "0.22.1"
+futures = "0.3.31"
+godot = "0.2.4"
+# godot = { git = "https://github.com/godot-rust/gdext", branch = "master" }
+hmac = "0.12.1"
+hyper = { version = "1.6.0", features = ["full"] }
+hyper-util = { version = "0.1.10", features = ["full"] }
+maud = { version = "0.27.0", features = ["axum"] }
+mime_guess = "2.0.5"
+qrcode = { version = "0.14.1", default-features = false, features = [] }
+reqwest = "0.12.12"
+russh = "0.50.4"
+rust-embed = { version = "8.6.0", features = [
+  "axum-ex",
+  "debug-embed",
+  "mime-guess",
+] }
+serde = { version = "1.0.218", features = ["derive"] }
+serde_json = "1.0.139"
+sha2 = "0.10.8"
+tokio = { version = "1.43.0", features = ["full"] }
+tokio-stream = { version = "0.1.17", features = ["net", "sync"] }
+tokio-util = "0.7.13"
+tower = "0.5.2"
+tower-http = { version = "0.6.2", features = ["fs", "trace"] }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = [
+  "fmt",
+  "env-filter",
+  "std",
+] }
+uuid = { version = "1.15.1", default-features = false }
