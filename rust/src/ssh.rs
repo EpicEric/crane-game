@@ -200,12 +200,10 @@ impl client::Handler for Client {
         &mut self,
         server_public_key: &ssh_key::PublicKey,
     ) -> Result<bool, Self::Error> {
-        match &self.server_fingerprint {
-            Some(server_fingerprint) => {
-                Ok(&server_public_key.fingerprint(HashAlg::Sha256).to_string()
-                    == server_fingerprint)
-            }
-            None => Ok(true),
+        if let Some(server_fingerprint) = &self.server_fingerprint {
+            Ok(&server_public_key.fingerprint(HashAlg::Sha256).to_string() == server_fingerprint)
+        } else {
+            Ok(true)
         }
     }
 

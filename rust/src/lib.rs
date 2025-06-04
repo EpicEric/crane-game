@@ -108,7 +108,7 @@ impl NetworkConnection {
                 .set(get_router(game_input_tx.clone(), game_message_rx).await)
                 .unwrap();
             ssh_entrypoint(
-                "sish.top",
+                "sandhole.com.br",
                 22,
                 &uuid::Builder::from_random_bytes(bytes)
                     .into_uuid()
