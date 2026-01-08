@@ -108,14 +108,13 @@ impl NetworkConnection {
                 .set(get_router(game_input_tx.clone(), game_message_rx).await)
                 .unwrap();
             ssh_entrypoint(
-                "sandhole.com.br",
-                22,
+                "sandhole.eric.dev.br",
+                443,
                 &uuid::Builder::from_random_bytes(bytes)
                     .into_uuid()
                     .hyphenated()
                     .to_string(),
                 AUDIENCE,
-                // None,
                 Some(::russh::keys::PrivateKeyWithHashAlg::new(
                     ::std::sync::Arc::new(
                         ::russh::keys::PrivateKey::from_openssh(include_str!(

@@ -146,7 +146,9 @@ impl TcpForwardSession {
                 ChannelMsg::Data { ref data } => {
                     let string = String::from_utf8_lossy(data);
                     if let Some(start) = string.find("https://") {
-                        let end = string[start..].find(char::is_whitespace).unwrap();
+                        let end = string[start..]
+                            .find(|c: char| c.is_whitespace() || c.is_ascii_control())
+                            .unwrap();
                         let url = &string[start..start + end];
                         let _ = game_input_tx.send(ClientInput::ConnectionUrl {
                             url: String::from(url),
