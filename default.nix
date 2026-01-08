@@ -12,8 +12,8 @@ let
     };
   };
 
+  inherit (pkgs-cross-mingw.windows) mingw_w64;
   mingw_w64_cc = pkgs-cross-mingw.stdenv.cc;
-  mingw_w64 = pkgs-cross-mingw.windows.mingw_w64;
   mingw_w64_pthreads_w_static = pkgs-cross-mingw.windows.pthreads.overrideAttrs (oldAttrs: {
     configureFlags = (oldAttrs.configureFlags or [ ]) ++ [
       "--enable-static"
@@ -36,13 +36,17 @@ let
 
   commonArgs = {
     version = "0";
+
     inherit src;
+
     cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
       inherit src;
       sourceRoot = "${src.name}/rust";
       hash = "sha256-kRZdndknulrZFeb7EDwNrpctjaT/UreFwZREOxv7e08=";
     };
+
     cargoRoot = "rust";
+
     postPatch = ''
       export HOME=$(mktemp -d)
       mkdir -p ~/.local/share/godot
@@ -52,23 +56,48 @@ let
 
   commonArgsWin = commonArgs // {
     RUSTFLAGS = (
-      map (a: ''-L ${a}/lib'') [
+      map (a: "-L ${a}/lib") [
         mingw_w64
         mingw_w64_pthreads_w_static
       ]
     );
-    buildInputs = [
-      pkgs.rustPlatform.cargoSetupHook
-      mingw_w64_cc
-      rustCc
-    ];
   };
 in
 {
+  linux-release = stdenv.mkDerivation (
+    commonArgs
+    // {
+      pname = "crane-game-linux-release";
+
+      buildInputs = [
+        pkgs.rustPlatform.cargoSetupHook
+        rust
+      ];
+
+      buildPhase = ''
+        ${rust}/bin/cargo build --release --manifest-path ./rust/Cargo.toml
+        mkdir ./export_linux
+        ${pkgs.godot_4_5}/bin/godot --headless --path ./godot --export-release "Linux" ../export_linux/CraneGame_linux_x86_64
+      '';
+
+      installPhase = ''
+        mkdir $out
+        cp ./export_linux/* $out
+      '';
+    }
+  );
+
   windows-release = stdenv.mkDerivation (
     commonArgsWin
     // {
       pname = "crane-game-windows-release";
+
+      buildInputs = [
+        pkgs.rustPlatform.cargoSetupHook
+        mingw_w64_cc
+        rustCc
+      ];
+
       buildPhase = ''
         ${rustCc}/bin/cargo build --target x86_64-pc-windows-gnu --release --manifest-path ./rust/Cargo.toml
         mkdir ./export_windows
