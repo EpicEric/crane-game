@@ -38,7 +38,9 @@ let
     version = "0";
 
     inherit src;
+  };
 
+  commonArgsRust = commonArgs // {
     cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
       inherit src;
       sourceRoot = "${src.name}/rust";
@@ -46,7 +48,9 @@ let
     };
 
     cargoRoot = "rust";
+  };
 
+  commonArgsGodot = commonArgs // {
     postPatch = ''
       export HOME=$(mktemp -d)
       mkdir -p ~/.local/share/godot
@@ -54,43 +58,38 @@ let
     '';
   };
 
-  commonArgsWin = commonArgs // {
-    RUSTFLAGS = (
-      map (a: "-L ${a}/lib") [
-        mingw_w64
-        mingw_w64_pthreads_w_static
-      ]
-    );
-  };
-in
-{
-  linux-release = stdenv.mkDerivation (
-    commonArgs
+  linux-release-rust = stdenv.mkDerivation (
+    commonArgsRust
     // {
-      pname = "crane-game-linux-release";
+      pname = "crane-game-linux-release-rust";
 
       buildInputs = [
+        pkgs.perl
         pkgs.rustPlatform.cargoSetupHook
         rust
       ];
 
       buildPhase = ''
         ${rust}/bin/cargo build --release --manifest-path ./rust/Cargo.toml
-        mkdir ./export_linux
-        ${pkgs.godot_4_5}/bin/godot --headless --path ./godot --export-release "Linux" ../export_linux/CraneGame_linux_x86_64
       '';
 
       installPhase = ''
-        mkdir $out
-        cp ./export_linux/* $out
+        mkdir -p $out/lib
+        cp ./rust/target/release/libcrane_game.so $out/lib/libcrane_game.so
       '';
     }
   );
 
-  windows-release = stdenv.mkDerivation (
-    commonArgsWin
+  windows-release-rust = stdenv.mkDerivation (
+    commonArgsRust
     // {
-      pname = "crane-game-windows-release";
+      pname = "crane-game-windows-release-rust";
+      RUSTFLAGS = (
+        map (a: "-L ${a}/lib") [
+          mingw_w64
+          mingw_w64_pthreads_w_static
+        ]
+      );
 
       buildInputs = [
         pkgs.rustPlatform.cargoSetupHook
@@ -100,14 +99,48 @@ in
 
       buildPhase = ''
         ${rustCc}/bin/cargo build --target x86_64-pc-windows-gnu --release --manifest-path ./rust/Cargo.toml
-        mkdir ./export_windows
-        ${pkgs.godot_4_5}/bin/godot --headless --path ./godot --export-release "Windows Desktop" ../export_windows/CraneGame_win.exe
       '';
 
       installPhase = ''
-        mkdir $out
-        cp ./export_windows/* $out
+        mkdir -p $out/lib
+        cp ./rust/target/x86_64-pc-windows-gnu/release/crane_game.dll $out/lib/crane_game.dll
       '';
     }
   );
+
+  linux-release = stdenv.mkDerivation (
+    commonArgsGodot
+    // {
+      pname = "crane-game-linux-release";
+
+      buildPhase = ''
+        mkdir -p rust/target/release/
+        cp ${linux-release-rust}/lib/libcrane_game.so rust/target/release/
+        mkdir $out
+        ${pkgs.godot_4_5}/bin/godot --headless --path ./godot --export-release "Linux" $out/CraneGame_linux_x86_64
+      '';
+    }
+  );
+
+  windows-release = stdenv.mkDerivation (
+    commonArgsGodot
+    // {
+      pname = "crane-game-windows-release";
+
+      buildPhase = ''
+        mkdir -p rust/target/x86_64-pc-windows-gnu/release/
+        cp ${windows-release-rust}/lib/crane_game.dll rust/target/x86_64-pc-windows-gnu/release/
+        mkdir $out
+        ${pkgs.godot_4_5}/bin/godot --headless --path ./godot --export-release "Windows Desktop" $out/CraneGame_win.exe
+      '';
+    }
+  );
+in
+{
+  inherit
+    linux-release-rust
+    windows-release-rust
+    linux-release
+    windows-release
+    ;
 }

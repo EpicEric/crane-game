@@ -1,12 +1,17 @@
 # crane-game
 
-## Build on nix-shell
+## Build for release with Nix
+
+Use the dev shell with `direnv allow`.
 
 ```bash
-# linux-debug
-cargo build
-# windows-release
-RUSTFLAGS=$WINDOWS_RUSTFLAGS cargo build --release --target x86_64-pc-windows-gnu
+nix-build . -A linux-release
+# steam-run ./result/CraneGame_linux_x86_64
+zip export/CraneGame_linux_x86_64 result/*
+
+nix-build . -A windows-release
+# wine64 ./result/CraneGame_win.exe
+zip export/CraneGame_win result/*
 ```
 
 ## Attributions
