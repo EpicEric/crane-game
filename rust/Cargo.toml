@@ -47,5 +47,5 @@ tracing-subscriber = { version = "0.3.19", features = [
 ] }
 uuid = { version = "1.15.1", default-features = false }
 
-[target.x86_64-unknown-linux-gnu.dependencies]
+[target.'cfg(unix)'.dependencies]
 openssl = { version = "0.10.72", features = ["vendored"] }

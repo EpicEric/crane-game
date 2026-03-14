@@ -51,8 +51,12 @@ let
   };
 
   commonArgsGodot = commonArgs // {
+    nativeBuildInputs = [
+      pkgs.godot_4_5
+      pkgs.writableTmpDirAsHomeHook
+    ];
+
     postPatch = ''
-      export HOME=$(mktemp -d)
       mkdir -p ~/.local/share/godot
       ln -s ${pkgs.godot_4_5-export-templates-bin}/share/godot/export_templates ~/.local/share/godot/export_templates
     '';
@@ -63,14 +67,15 @@ let
     // {
       pname = "crane-game-linux-release-rust";
 
+      nativeBuildInputs = [ rust ];
+
       buildInputs = [
         pkgs.perl
         pkgs.rustPlatform.cargoSetupHook
-        rust
       ];
 
       buildPhase = ''
-        ${rust}/bin/cargo build --release --manifest-path ./rust/Cargo.toml
+        cargo build --release --manifest-path ./rust/Cargo.toml
       '';
 
       installPhase = ''
@@ -91,14 +96,15 @@ let
         ]
       );
 
+      nativeBuildInputs = [ rustCc ];
+
       buildInputs = [
         pkgs.rustPlatform.cargoSetupHook
         mingw_w64_cc
-        rustCc
       ];
 
       buildPhase = ''
-        ${rustCc}/bin/cargo build --target x86_64-pc-windows-gnu --release --manifest-path ./rust/Cargo.toml
+        cargo build --target x86_64-pc-windows-gnu --release --manifest-path ./rust/Cargo.toml
       '';
 
       installPhase = ''
@@ -117,7 +123,7 @@ let
         mkdir -p rust/target/release/
         cp ${linux-release-rust}/lib/libcrane_game.so rust/target/release/
         mkdir $out
-        ${pkgs.godot_4_5}/bin/godot --headless --path ./godot --export-release "Linux" $out/CraneGame_linux_x86_64
+        godot --headless --path ./godot --export-release "Linux" $out/CraneGame_linux_x86_64
       '';
     }
   );
@@ -131,7 +137,7 @@ let
         mkdir -p rust/target/x86_64-pc-windows-gnu/release/
         cp ${windows-release-rust}/lib/crane_game.dll rust/target/x86_64-pc-windows-gnu/release/
         mkdir $out
-        ${pkgs.godot_4_5}/bin/godot --headless --path ./godot --export-release "Windows Desktop" $out/CraneGame_win.exe
+        godot --headless --path ./godot --export-release "Windows Desktop" $out/CraneGame_win.exe
       '';
     }
   );

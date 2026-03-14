@@ -5,11 +5,11 @@
 Use the dev shell with `direnv allow`.
 
 ```bash
-nix-build . -A linux-release
+nix-build -A linux-release
 # steam-run ./result/CraneGame_linux_x86_64
 zip export/CraneGame_linux_x86_64 result/*
 
-nix-build . -A windows-release
+nix-build -A windows-release
 # wine64 ./result/CraneGame_win.exe
 zip export/CraneGame_win result/*
 ```
