@@ -119,9 +119,16 @@ let
     // {
       pname = "crane-game-linux-release";
 
-      buildPhase = ''
+      patchPhase = ''
+        runHook prePatch
+
         mkdir -p rust/target/release/
         cp ${linux-release-rust}/lib/libcrane_game.so rust/target/release/
+
+        runHook postPatch
+      '';
+
+      buildPhase = ''
         mkdir $out
         godot --headless --path ./godot --export-release "Linux" $out/CraneGame_linux_x86_64
       '';
@@ -133,9 +140,16 @@ let
     // {
       pname = "crane-game-windows-release";
 
-      buildPhase = ''
+      patchPhase = ''
+        runHook prePatch
+
         mkdir -p rust/target/x86_64-pc-windows-gnu/release/
         cp ${windows-release-rust}/lib/crane_game.dll rust/target/x86_64-pc-windows-gnu/release/
+
+        runHook postPatch
+      '';
+
+      buildPhase = ''
         mkdir $out
         godot --headless --path ./godot --export-release "Windows Desktop" $out/CraneGame_win.exe
       '';
